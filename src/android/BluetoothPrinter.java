@@ -38,13 +38,12 @@ public class BluetoothPrinter extends CordovaPlugin {
 	@Override
 	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
 		if (action.equals("list")) {
-			listBT(callbackContext);
-			return true;
+			return listBT(callbackContext);
 		} else if (action.equals("open")) {
 			String name = args.getString(0);
 			if (findBT(callbackContext, name)) {
 				try {
-					openBT(callbackContext);
+					return openBT(callbackContext);
 				} catch (IOException e) {
 					Log.e(LOG_TAG, e.getMessage());
 					e.printStackTrace();
@@ -52,29 +51,26 @@ public class BluetoothPrinter extends CordovaPlugin {
 			} else {
 				callbackContext.error("Bluetooth Device Not Found: " + name);
 			}
-			return true;
 		} else if (action.equals("print")) {
 			try {
 				String msg = args.getString(0);
-				sendData(callbackContext, msg);
+				return sendData(callbackContext, msg);
 			} catch (IOException e) {
 				Log.e(LOG_TAG, e.getMessage());
 				e.printStackTrace();
 			}
-			return true;
 		} else if (action.equals("close")) {
 			try {
-				closeBT(callbackContext);
+				return closeBT(callbackContext);
 			} catch (IOException e) {
 				Log.e(LOG_TAG, e.getMessage());
 				e.printStackTrace();
 			}
-			return true;
 		}
 		return false;
 	}
 
-	void listBT(CallbackContext callbackContext) {
+	boolean listBT(CallbackContext callbackContext) {
 		BluetoothAdapter mBluetoothAdapter = null;
 		String errMsg = null;
 		try {
@@ -100,6 +96,7 @@ public class BluetoothPrinter extends CordovaPlugin {
 					json.put(device.getName());
 				}
 				callbackContext.success(json);
+				return true;
 			} else {
 				callbackContext.error("No Bluetooth Device Found");
 			}
@@ -110,6 +107,7 @@ public class BluetoothPrinter extends CordovaPlugin {
 			e.printStackTrace();
 			callbackContext.error(errMsg);
 		}
+		return false;
 	}
 
 	// This will find a bluetooth printer device
@@ -144,7 +142,7 @@ public class BluetoothPrinter extends CordovaPlugin {
 	}
 
 	// Tries to open a connection to the bluetooth printer device
-	void openBT(CallbackContext callbackContext) throws IOException {
+	boolean openBT(CallbackContext callbackContext) throws IOException {
 		try {
 			// Standard SerialPortService ID
 			UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
@@ -155,12 +153,14 @@ public class BluetoothPrinter extends CordovaPlugin {
 			beginListenForData();
 //			Log.d(LOG_TAG, "Bluetooth Opened: " + mmDevice.getName());
 			callbackContext.success("Bluetooth Opened: " + mmDevice.getName());
+			return true;
 		} catch (Exception e) {
 			String errMsg = e.getMessage();
 			Log.e(LOG_TAG, errMsg);
 			e.printStackTrace();
 			callbackContext.error(errMsg);
 		}
+		return false;
 	}
 
 	// After opening a connection to bluetooth printer device, 
@@ -215,7 +215,7 @@ public class BluetoothPrinter extends CordovaPlugin {
 	/*
 	 * This will send data to be printed by the bluetooth printer
 	 */
-	void sendData(CallbackContext callbackContext, String msg) throws IOException {
+	boolean sendData(CallbackContext callbackContext, String msg) throws IOException {
 		try {
 			// the text typed by the user
 //			msg += "\n";
@@ -223,16 +223,18 @@ public class BluetoothPrinter extends CordovaPlugin {
 			// tell the user data were sent
 //			Log.d(LOG_TAG, "Data Sent");
 			callbackContext.success("Data Sent");
+			return true;
 		} catch (Exception e) {
 			String errMsg = e.getMessage();
 			Log.e(LOG_TAG, errMsg);
 			e.printStackTrace();
 			callbackContext.error(errMsg);
 		}
+		return false;
 	}
 
 	// Close the connection to bluetooth printer.
-	void closeBT(CallbackContext callbackContext) throws IOException {
+	boolean closeBT(CallbackContext callbackContext) throws IOException {
 		try {
 			stopWorker = true;
 			mmOutputStream.close();
@@ -240,11 +242,13 @@ public class BluetoothPrinter extends CordovaPlugin {
 			mmSocket.close();
 //			myLabel.setText("Bluetooth Closed");
 			callbackContext.success("Bluetooth Closed");
+			return true;
 		} catch (Exception e) {
 			String errMsg = e.getMessage();
 			Log.e(LOG_TAG, errMsg);
 			e.printStackTrace();
 			callbackContext.error(errMsg);
 		}
+		return false;
 	}
 }
