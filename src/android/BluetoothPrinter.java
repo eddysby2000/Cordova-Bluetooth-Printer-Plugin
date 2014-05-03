@@ -3,6 +3,7 @@ package org.apache.cordova.sipkita;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Hashtable;
 import java.util.Set;
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -90,6 +92,11 @@ public class BluetoothPrinter extends CordovaPlugin {
 			if (pairedDevices.size() > 0) {
 				JSONArray json = new JSONArray();
 				for (BluetoothDevice device : pairedDevices) {
+					Hashtable map = new Hashtable();
+					map.put("type", device.getType());
+					map.put("address", device.getAddress());
+					map.put("name", device.getName());
+					JSONObject jObj = new JSONObject(map);
 					json.put(device.getName());
 				}
 				callbackContext.success(json);
