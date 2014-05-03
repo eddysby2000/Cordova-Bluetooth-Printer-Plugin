@@ -37,6 +37,7 @@ public class BluetoothPrinter extends CordovaPlugin {
 	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
 		if (action.equals("list")) {
 			listBT(callbackContext);
+			return true;
 		} else if (action.equals("open")) {
 			String name = args.getString(0);
 			if (findBT(callbackContext, name)) {
@@ -49,6 +50,7 @@ public class BluetoothPrinter extends CordovaPlugin {
 			} else {
 				callbackContext.error("Bluetooth Device Not Found: " + name);
 			}
+			return true;
 		} else if (action.equals("print")) {
 			try {
 				String msg = args.getString(0);
@@ -57,6 +59,7 @@ public class BluetoothPrinter extends CordovaPlugin {
 				Log.e(LOG_TAG, e.getMessage());
 				e.printStackTrace();
 			}
+			return true;
 		} else if (action.equals("close")) {
 			try {
 				closeBT(callbackContext);
@@ -64,6 +67,7 @@ public class BluetoothPrinter extends CordovaPlugin {
 				Log.e(LOG_TAG, e.getMessage());
 				e.printStackTrace();
 			}
+			return true;
 		}
 		return false;
 	}
