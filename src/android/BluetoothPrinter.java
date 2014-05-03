@@ -38,12 +38,13 @@ public class BluetoothPrinter extends CordovaPlugin {
 	@Override
 	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
 		if (action.equals("list")) {
-			return listBT(callbackContext);
+			listBT(callbackContext);
+			return true;
 		} else if (action.equals("open")) {
 			String name = args.getString(0);
 			if (findBT(callbackContext, name)) {
 				try {
-					return openBT(callbackContext);
+					openBT(callbackContext);
 				} catch (IOException e) {
 					Log.e(LOG_TAG, e.getMessage());
 					e.printStackTrace();
@@ -51,26 +52,29 @@ public class BluetoothPrinter extends CordovaPlugin {
 			} else {
 				callbackContext.error("Bluetooth Device Not Found: " + name);
 			}
+			return true;
 		} else if (action.equals("print")) {
 			try {
 				String msg = args.getString(0);
-				return sendData(callbackContext, msg);
+				sendData(callbackContext, msg);
 			} catch (IOException e) {
 				Log.e(LOG_TAG, e.getMessage());
 				e.printStackTrace();
 			}
+			return true;
 		} else if (action.equals("close")) {
 			try {
-				return closeBT(callbackContext);
+				closeBT(callbackContext);
 			} catch (IOException e) {
 				Log.e(LOG_TAG, e.getMessage());
 				e.printStackTrace();
 			}
+			return true;
 		}
 		return false;
 	}
 
-	boolean listBT(CallbackContext callbackContext) {
+	void listBT(CallbackContext callbackContext) {
 		BluetoothAdapter mBluetoothAdapter = null;
 		String errMsg = null;
 		try {
@@ -79,7 +83,7 @@ public class BluetoothPrinter extends CordovaPlugin {
 				errMsg = "No bluetooth adapter available";
 				Log.e(LOG_TAG, errMsg);
 				callbackContext.error(errMsg);
-				return false;
+				return;
 			}
 			if (!mBluetoothAdapter.isEnabled()) {
 				Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -97,7 +101,6 @@ public class BluetoothPrinter extends CordovaPlugin {
 					json.put(device.getName());
 				}
 				callbackContext.success(json);
-				return true;
 			} else {
 				callbackContext.error("No Bluetooth Device Found");
 			}
@@ -108,7 +111,6 @@ public class BluetoothPrinter extends CordovaPlugin {
 			e.printStackTrace();
 			callbackContext.error(errMsg);
 		}
-		return false;
 	}
 
 	// This will find a bluetooth printer device
