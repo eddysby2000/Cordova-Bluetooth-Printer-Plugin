@@ -35,8 +35,11 @@ public class BluetoothPrinter extends CordovaPlugin {
 
 	@Override
 	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-		if (action.equals("open")) {
-			findBT();
+		if (action.equals("list")) {
+			//
+		} else if (action.equals("open")) {
+			String name = args.getString(0);
+			findBT(name);
 			try {
 				openBT();
 			} catch (IOException e) {
@@ -63,7 +66,7 @@ public class BluetoothPrinter extends CordovaPlugin {
 	}
 
 	// This will find a bluetooth printer device
-	void findBT() {
+	void findBT(String name) {
 		try {
 			mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 			if (mBluetoothAdapter == null) {
@@ -77,7 +80,7 @@ public class BluetoothPrinter extends CordovaPlugin {
 			if (pairedDevices.size() > 0) {
 				for (BluetoothDevice device : pairedDevices) {
 					// MP300 is the name of the bluetooth printer device
-					if (device.getName().startsWith("P25")) {
+					if (device.getName().equalsIgnoreCase(name)) {
 						mmDevice = device;
 						break;
 					}
