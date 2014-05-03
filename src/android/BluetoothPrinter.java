@@ -79,6 +79,7 @@ public class BluetoothPrinter extends CordovaPlugin {
 				errMsg = "No bluetooth adapter available";
 				Log.e(LOG_TAG, errMsg);
 				callbackContext.error(errMsg);
+				return false;
 			}
 			if (!mBluetoothAdapter.isEnabled()) {
 				Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
