@@ -36,27 +36,30 @@ public class BluetoothPrinter extends CordovaPlugin {
 	@Override
 	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
 		if (action.equals("list")) {
-			//
+			listBT(callbackContext);
 		} else if (action.equals("open")) {
 			String name = args.getString(0);
-			findBT(name);
-			try {
-				openBT();
-			} catch (IOException e) {
-				Log.e(LOG_TAG, e.getMessage());
-				e.printStackTrace();
+			if (findBT(callbackContext, name)) {
+				try {
+					openBT(callbackContext);
+				} catch (IOException e) {
+					Log.e(LOG_TAG, e.getMessage());
+					e.printStackTrace();
+				}
+			} else {
+				callbackContext.error("Bluetooth Device Not Found: " + name);
 			}
 		} else if (action.equals("print")) {
 			try {
 				String msg = args.getString(0);
-				sendData(msg);
+				sendData(callbackContext, msg);
 			} catch (IOException e) {
 				Log.e(LOG_TAG, e.getMessage());
 				e.printStackTrace();
 			}
 		} else if (action.equals("close")) {
 			try {
-				closeBT();
+				closeBT(callbackContext);
 			} catch (IOException e) {
 				Log.e(LOG_TAG, e.getMessage());
 				e.printStackTrace();
@@ -65,8 +68,41 @@ public class BluetoothPrinter extends CordovaPlugin {
 		return false;
 	}
 
+	void listBT(CallbackContext callbackContext) {
+		BluetoothAdapter mBluetoothAdapter = null;
+		String errMsg = null;
+		try {
+			mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+			if (mBluetoothAdapter == null) {
+				errMsg = "No bluetooth adapter available";
+				Log.e(LOG_TAG, errMsg);
+				callbackContext.error(errMsg);
+			}
+			if (!mBluetoothAdapter.isEnabled()) {
+				Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+				this.cordova.getActivity().startActivityForResult(enableBluetooth, 0);
+			}
+			Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+			if (pairedDevices.size() > 0) {
+				JSONArray json = new JSONArray();
+				for (BluetoothDevice device : pairedDevices) {
+					json.put(device.getName());
+				}
+				callbackContext.success(json);
+			} else {
+				callbackContext.error("No Bluetooth Device Found");
+			}
+//			Log.d(LOG_TAG, "Bluetooth Device Found: " + mmDevice.getName());
+		} catch (Exception e) {
+			errMsg = e.getMessage();
+			Log.e(LOG_TAG, errMsg);
+			e.printStackTrace();
+			callbackContext.error(errMsg);
+		}
+	}
+
 	// This will find a bluetooth printer device
-	void findBT(String name) {
+	boolean findBT(CallbackContext callbackContext, String name) {
 		try {
 			mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 			if (mBluetoothAdapter == null) {
@@ -82,22 +118,22 @@ public class BluetoothPrinter extends CordovaPlugin {
 					// MP300 is the name of the bluetooth printer device
 					if (device.getName().equalsIgnoreCase(name)) {
 						mmDevice = device;
-						break;
+						return true;
 					}
 				}
 			}
 			Log.d(LOG_TAG, "Bluetooth Device Found: " + mmDevice.getName());
-		} catch (NullPointerException e) {
-			Log.e(LOG_TAG, e.getMessage());
-			e.printStackTrace();
 		} catch (Exception e) {
-			Log.e(LOG_TAG, e.getMessage());
+			String errMsg = e.getMessage();
+			Log.e(LOG_TAG, errMsg);
 			e.printStackTrace();
+			callbackContext.error(errMsg);
 		}
+		return false;
 	}
 
 	// Tries to open a connection to the bluetooth printer device
-	void openBT() throws IOException {
+	void openBT(CallbackContext callbackContext) throws IOException {
 		try {
 			// Standard SerialPortService ID
 			UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
@@ -106,13 +142,13 @@ public class BluetoothPrinter extends CordovaPlugin {
 			mmOutputStream = mmSocket.getOutputStream();
 			mmInputStream = mmSocket.getInputStream();
 			beginListenForData();
-			Log.d(LOG_TAG, "Bluetooth Opened: " + mmDevice.getName());
-		} catch (NullPointerException e) {
-			Log.e(LOG_TAG, e.getMessage());
-			e.printStackTrace();
+//			Log.d(LOG_TAG, "Bluetooth Opened: " + mmDevice.getName());
+			callbackContext.success("Bluetooth Opened: " + mmDevice.getName());
 		} catch (Exception e) {
-			Log.e(LOG_TAG, e.getMessage());
+			String errMsg = e.getMessage();
+			Log.e(LOG_TAG, errMsg);
 			e.printStackTrace();
+			callbackContext.error(errMsg);
 		}
 	}
 
@@ -168,36 +204,36 @@ public class BluetoothPrinter extends CordovaPlugin {
 	/*
 	 * This will send data to be printed by the bluetooth printer
 	 */
-	void sendData(String msg) throws IOException {
+	void sendData(CallbackContext callbackContext, String msg) throws IOException {
 		try {
 			// the text typed by the user
 //			msg += "\n";
 			mmOutputStream.write(msg.getBytes());
 			// tell the user data were sent
-			Log.d(LOG_TAG, "Data Sent");
-		} catch (NullPointerException e) {
-			Log.e(LOG_TAG, e.getMessage());
-			e.printStackTrace();
+//			Log.d(LOG_TAG, "Data Sent");
+			callbackContext.success("Data Sent");
 		} catch (Exception e) {
-			Log.e(LOG_TAG, e.getMessage());
+			String errMsg = e.getMessage();
+			Log.e(LOG_TAG, errMsg);
 			e.printStackTrace();
+			callbackContext.error(errMsg);
 		}
 	}
 
 	// Close the connection to bluetooth printer.
-	void closeBT() throws IOException {
+	void closeBT(CallbackContext callbackContext) throws IOException {
 		try {
 			stopWorker = true;
 			mmOutputStream.close();
 			mmInputStream.close();
 			mmSocket.close();
 //			myLabel.setText("Bluetooth Closed");
-		} catch (NullPointerException e) {
-			Log.e(LOG_TAG, e.getMessage());
-			e.printStackTrace();
+			callbackContext.success("Bluetooth Closed");
 		} catch (Exception e) {
-			Log.e(LOG_TAG, e.getMessage());
+			String errMsg = e.getMessage();
+			Log.e(LOG_TAG, errMsg);
 			e.printStackTrace();
+			callbackContext.error(errMsg);
 		}
 	}
 }
