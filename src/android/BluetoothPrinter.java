@@ -76,7 +76,7 @@ public class BluetoothPrinter extends CordovaPlugin {
 
 	void listBT(CallbackContext callbackContext) {
 		BluetoothAdapter mBluetoothAdapter = null;
-		String errMsg = null;
+		String errMsg = "";
 		try {
 			mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 			if (mBluetoothAdapter == null) {
@@ -93,12 +93,12 @@ public class BluetoothPrinter extends CordovaPlugin {
 			if (pairedDevices.size() > 0) {
 				JSONArray json = new JSONArray();
 				for (BluetoothDevice device : pairedDevices) {
-//					Hashtable map = new Hashtable();
-//					map.put("type", device.getType());
-//					map.put("address", device.getAddress());
-//					map.put("name", device.getName());
-//					JSONObject jObj = new JSONObject(map);
-					json.put(device.getName());
+					Hashtable map = new Hashtable();
+					map.put("type", device.getType());
+					map.put("address", device.getAddress());
+					map.put("name", device.getName());
+					JSONObject jObj = new JSONObject(map);
+					json.put(jObj);
 				}
 				callbackContext.success(json);
 			} else {
@@ -128,7 +128,7 @@ public class BluetoothPrinter extends CordovaPlugin {
 			if (pairedDevices.size() > 0) {
 				for (BluetoothDevice device : pairedDevices) {
 					// MP300 is the name of the bluetooth printer device
-					if (device.getName().equalsIgnoreCase(name)) {
+					if (device.getAddress().equalsIgnoreCase(name)) {
 						mmDevice = device;
 						return true;
 					}
@@ -166,7 +166,7 @@ public class BluetoothPrinter extends CordovaPlugin {
 		return false;
 	}
 
-	// After opening a connection to bluetooth printer device, 
+	// After opening a connection to bluetooth printer device,
 	// we have to listen and check if a data were sent to be printed.
 	void beginListenForData() {
 		try {
