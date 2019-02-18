@@ -1,0 +1,28 @@
+{
+  "name": "org.apache.cordova.sipkita",
+  "version": "0.0.1-dev",
+  "description": "Cordova Bluetooth Printer Plugin",
+  "cordova": {
+    "id": "org.apache.cordova.sipkita",
+    "platforms": [
+      "android"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bottom-Line-Software/Cordova-Bluetooth-Printer-Plugin.git"
+  },
+  "keywords": [
+    "cordova",
+    "bluetooth",
+    "printer",
+    "ecosystem:cordova",
+    "cordova-android"
+  ],
+  "author": "",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/Bottom-Line-Software/Cordova-Bluetooth-Printer-Plugin/issues"
+  },
+  "homepage": "https://github.com/Bottom-Line-Software/Cordova-Bluetooth-Printer-Plugin#readme"
+}
